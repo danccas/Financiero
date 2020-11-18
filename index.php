@@ -1500,17 +1500,17 @@ foreach($MESES as $k => $m) {
         '{$last}' as deuda_fecha,
         (
           SELECT
-            SUM((SELECT COALESCE(contable, 0) FROM cierre WHERE usuario_id = C.usuario_id AND cuenta_id = C.id AND moneda_id = M.id AND fecha < '{$last}' ORDER BY fecha DESC, id DESC LIMIT 1))
+            SUM((SELECT COALESCE(contable, 0) FROM cierre WHERE usuario_id = C.usuario_id AND cuenta_id = C.id AND moneda_id = C.moneda_id AND fecha < '{$last}' ORDER BY fecha DESC, id DESC LIMIT 1))
           FROM cuenta C
-          WHERE C.usuario_id = {$usuario_id} AND C.tipo_id = 2 AND (C.eliminado IS NULL OR DATE(C.eliminado) > '{$last}')
+          WHERE C.usuario_id = {$usuario_id} AND C.tipo_id = 2 AND (C.eliminado IS NULL OR DATE(C.eliminado) > '{$last}') AND C.moneda_id = M.id
         ) as deuda_cierre,
         (SELECT
           COALESCE(SUM(CASE WHEN MOV.bloqueado = 0 THEN MOV.monto ELSE (MOV.monto * -1) END), 0)
         FROM cuenta C
         JOIN movimiento MOV ON MOV.cuenta_id = C.id AND MOV.eliminado IS NULL
-          AND DATE(MOV.fecha) > (SELECT fecha FROM cierre WHERE usuario_id = C.usuario_id AND cuenta_id = C.id AND moneda_id = M.id AND fecha < '{$last}' ORDER BY fecha DESC, id DESC LIMIT 1) AND date_format(MOV.fecha, '%m') <= " . ($k + 1) . " AND date_format(MOV.fecha, '%Y') = " . date('Y') . "
+          AND DATE(MOV.fecha) > (SELECT fecha FROM cierre WHERE usuario_id = C.usuario_id AND cuenta_id = C.id AND moneda_id = C.moneda_id AND fecha < '{$last}' ORDER BY fecha DESC, id DESC LIMIT 1) AND date_format(MOV.fecha, '%m') <= " . ($k + 1) . " AND date_format(MOV.fecha, '%Y') = " . date('Y') . "
           " . (date('m') == ($k + 1) ? 'AND MOV.efectuado = 1' : "AND ((date_format(MOV.fecha, '%Y-%m') = '" . $mes_actual . "' AND MOV.efectuado = 1) OR (date_format(MOV.fecha, '%Y-%m') <> '" . $mes_actual . "'))") . "
-        WHERE C.usuario_id = {$usuario_id} AND MOV.moneda_id = M.id AND C.tipo_id = 2
+        WHERE C.usuario_id = {$usuario_id} AND MOV.moneda_id = M.id AND C.tipo_id = 2 AND C.moneda_id = M.id
         ) as deuda_mes,
         (SELECT
           COALESCE(SUM((SELECT SUM(monto) FROM movimiento WHERE prestamo_id = P.id AND eliminado IS NULL AND efectuado = 0 AND monto < 0)), 0)
