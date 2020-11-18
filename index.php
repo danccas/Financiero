@@ -1,5 +1,4 @@
 <?php
-
 session_start(); 
 
 require_once(__DIR__ . '/conf.php');
@@ -1476,31 +1475,28 @@ foreach($MESES as $k => $m) {
     $rp = $db->get("
     SELECT
       *,
-      (disponible + deuda_cierre + deuda_mes + deuda_prestamo) as saldo
+      (disponible1 + disponible2 + deuda_cierre + deuda_mes + deuda_prestamo) as saldo
     FROM (
       SELECT
         '$f' as mes,
         M.id as moneda_id,
         M.nombre as moneda,
         (
-          (
-            SELECT
-              COALESCE(SUM(CI.disponible), 0)
-            FROM cierre CI
-              JOIN cuenta C ON C.id = CI.cuenta_id AND C.tipo_id = 1
-            WHERE CI.usuario_id = {$usuario_id} AND date_format(CI.fecha, '%Y-%m') = '" . $mes_actual_cierre . "' AND CI.moneda_id = M.id
-          )
-          +
-          (
-            SELECT
-              COALESCE(SUM(CASE WHEN MOV.bloqueado = 0 THEN MOV.monto ELSE (MOV.monto * -1) END), 0)
-            FROM cuenta C
-            JOIN movimiento MOV ON MOV.cuenta_id = C.id AND MOV.eliminado IS NULL
-              AND DATE(MOV.fecha) > '" . $fecha_actual_cierre . "' AND date_format(MOV.fecha, '%m') <= " . ($k + 1) . " AND date_format(MOV.fecha, '%Y') = " . date('Y') . "
-              " . (date('m') == ($k + 1) ? 'AND MOV.efectuado = 1' : "AND ((date_format(MOV.fecha, '%Y-%m') = '" . $mes_actual . "' AND MOV.efectuado = 1) OR (date_format(MOV.fecha, '%Y-%m') <> '" . $mes_actual . "'))") . "
-            WHERE C.usuario_id = {$usuario_id} AND MOV.moneda_id = M.id AND C.tipo_id = 1
-          )
-        ) as disponible,
+          SELECT
+            COALESCE(SUM(CI.disponible), 0)
+          FROM cierre CI
+            JOIN cuenta C ON C.id = CI.cuenta_id AND C.tipo_id = 1
+          WHERE CI.usuario_id = {$usuario_id} AND date_format(CI.fecha, '%Y-%m') = '" . $mes_actual_cierre . "' AND CI.moneda_id = M.id
+        ) as disponible1,
+        (
+          SELECT
+            COALESCE(SUM(CASE WHEN MOV.bloqueado = 0 THEN MOV.monto ELSE (MOV.monto * -1) END), 0)
+          FROM cuenta C
+          JOIN movimiento MOV ON MOV.cuenta_id = C.id AND MOV.eliminado IS NULL
+            AND DATE(MOV.fecha) > '" . $fecha_actual_cierre . "' AND date_format(MOV.fecha, '%m') <= " . ($k + 1) . " AND date_format(MOV.fecha, '%Y') = " . date('Y') . "
+            " . (date('m') == ($k + 1) ? 'AND MOV.efectuado = 1' : "AND ((date_format(MOV.fecha, '%Y-%m') = '" . $mes_actual . "' AND MOV.efectuado = 1) OR (date_format(MOV.fecha, '%Y-%m') <> '" . $mes_actual . "'))") . "
+          WHERE C.usuario_id = {$usuario_id} AND MOV.moneda_id = M.id AND C.tipo_id = 1
+        ) as disponible2,
         '{$last}' as deuda_fecha,
         (
           SELECT
