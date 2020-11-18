@@ -304,7 +304,9 @@ $form->addField('descripcion', 'textarea:autocomplete')->setOptions(function($fo
       categoria_id,
       moneda_id,
       cuenta_id
-    FROM movimiento WHERE LOWER(descripcion) LIKE ?
+    FROM movimiento
+    WHERE LOWER(descripcion) LIKE ?
+    AND categoria_id <> 29
     ORDER BY fecha DESC
     LIMIT 10", false, false, array(
     $term
