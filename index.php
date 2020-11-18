@@ -892,7 +892,7 @@ $table->setData(function() use($db, $mes_visto, $usuario_id) {
     FROM movimiento MOV
       JOIN categoria C ON C.id = MOV.categoria_id
       JOIN moneda M ON M.id = MOV.moneda_id
-    WHERE MOV.usuario_id = {$usuario_id} AND date_format(MOV.fecha, '%Y-%m') = '" . $mes_visto . "' AND MOV.eliminado IS NULL AND MOV.efectuado = 1 AND MOV.contable = 1
+    WHERE MOV.usuario_id = {$usuario_id} AND date_format(MOV.fecha, '%Y-%m') = '" . $mes_visto . "' AND MOV.eliminado IS NULL AND MOV.efectuado = 1 AND MOV.contable = 1 AND MOV.categoria_id <> 29
     GROUP BY C.id, M.id
     ORDER BY monto_gasto ASC");
 }, function($n) {
