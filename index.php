@@ -1062,7 +1062,7 @@ $table->setData(function() use($db, $mes_visto, $usuario_id, &$ls) {
   JOIN tipo T ON T.id = C.tipo_id
   LEFT JOIN categoria CAT ON CAT.id = MOV.categoria_id
   LEFT JOIN banco B ON B.id = C.banco_id
-  WHERE MOV.usuario_id = {$usuario_id} AND date_format(MOV.fecha, '%Y-%m') = '" . $mes_visto . "' AND MOV.eliminado IS NULL " . (!empty($_GET['cuenta']) ? ' AND C.id = ' . $_GET['cuenta'] : '')  . " AND MOV.efectuado = 1
+  WHERE MOV.usuario_id = {$usuario_id} AND date_format(MOV.fecha, '%Y-%m') = '" . $mes_visto . "' AND MOV.eliminado IS NULL " . (!empty($_GET['cuenta']) ? ' AND C.id = ' . $_GET['cuenta'] : '')  . " AND MOV.efectuado = 1 AND MOV.categoria_id <> 29
   ORDER BY MOV.fecha DESC, MOV.id DESC");
   return $ls;
 }, function($n) use(&$ls, &$grupos) {
