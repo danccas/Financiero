@@ -4,13 +4,12 @@ require_once(ABS_LIBRERIAS . 'formity2.php');
 require_once(ABS_LIBRERIAS . 'chartjs.php');
 
 
-Doris::registerDSN('financiero', 'mysql://root@localhost:3306/financiero');
-
 $db = Doris::init('financiero');
 
-$time = time();
-#$time = strtotime('2020-02-27');
-
+$fechas = dateRange('2021-01-01', date('Y-m-d'), '+1 day');
+foreach ($fechas as $fecha) {
+  echo "=> {$fecha} \n";
+$time = strtotime($fecha);
 $fecha_actual = date('Y-m-d', $time);
 $mes_actual   = date('Y-m', $time);
 $mes_cierre   = date('Y-m', strtotime('last day of previous month', $time));
@@ -114,8 +113,8 @@ foreach($cuentas as $c) {
 
 /* Quitamos los no efectuados de meses anteriores */
 $db->update('movimiento', array('fecha' => Doris::time($fecha_siguiente)), "DATE(fecha) <= '" . $fecha_actual . "' AND efectuado = 0");
-
-/* Cierres */
+}
+/* Cierres 
 $ls = $db->get("SELECT * FROM recurrente WHERE procesado IS NULL");
 foreach($ls as $n) {
   $fecha_inicio_unix = strtotime($n['fecha_inicio']);
@@ -150,4 +149,4 @@ foreach($ls as $n) {
     'procesado' => Doris::time(),
   ), 'id = ' . $n['id']);
   $db->commit();
-}
+}*/

@@ -3,12 +3,21 @@ require_once(__DIR__ . '/conf.php');
 require_once(ABS_LIBRERIAS . 'curly.php');
 
 
-Doris::registerDSN('financiero', 'mysql://root@localhost:3306/financiero');
-
 $db = Doris::init('financiero');
 
 $fecha_actual = date('Y-m-d');
 
+function curly2($url, $headers) {
+$ch = curl_init($url);
+curl_setopt($ch,CURLOPT_ENCODING , "");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+$output = curl_exec($ch);
+curl_close($ch);
+return $output;
+}
 function extraer_parte($desde, $hasta = NULL, $html, $all = false) {
   $parte = explode($desde, $html);
   unset($html);
@@ -42,11 +51,12 @@ function extraer_parte($desde, $hasta = NULL, $html, $all = false) {
 
 
 $url = 'https://cuantoestaeldolar.pe/';
-$web = Curly(CURLY_GET, $url);
-$web = extraer_parte('<h3 class="ico-cambista">Cambistas (Paralelo)</h3>', '<div class="clear-fix list-p-d mb-b">', $web);
+$web = curly2($url, []);
+$web = extraer_parte('<h3 class="ico-cambista">Cambista</h3>', '<div id="blockPPreci" class="clear-fix block-p-preci">', $web);
+$web = str_replace('<small>$</small>', '', $web);
+$web = str_replace('<small>S/.</small>', '', $web);
 $compra = extraer_parte("tb_dollar_compra\">", '</div>', $web);
 $venta  = extraer_parte("tb_dollar_venta\">", '</div>', $web);
-
 $data = array(
   '*fecha'       => $fecha_actual,
   '*desde_id'    => 1,

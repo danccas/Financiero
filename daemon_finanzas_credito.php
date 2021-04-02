@@ -4,16 +4,18 @@ require_once(ABS_LIBRERIAS . 'formity2.php');
 require_once(ABS_LIBRERIAS . 'chartjs.php');
 
 
-Doris::registerDSN('financiero', 'mysql://root@localhost:3306/financiero');
-
 $db = Doris::init('financiero');
 
-$now = strtotime('2020-02-17');
-#$now = time();
+$fechas = dateRange('2020-01-01', date('Y-m-d'), '+1 day');
 
-for($i = 1; $i <= date('d', $now); $i++) {
+foreach($fechas as $fecha) {
+  echo "=> {$fecha} \n";
+//$now = strtotime('2021-01-28');
+//$now = strototime($fecha);
+//$now = strtotime('2021-02-28');
+
 #$unix_actual   = time();
-$unix_actual   = strtotime(date('Y-m-' . str_pad($i, 2, '0', STR_PAD_LEFT), $now));
+$unix_actual   = strtotime($fecha);
 #echo $i . " => " . date("Y-m-d", $unix_actual) . "\n";continue;
 $unix_anterior = strtotime('previous month', $unix_actual);
 

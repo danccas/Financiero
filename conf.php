@@ -34,7 +34,10 @@ require_once(ABS_LIBRERIAS . 'doris.pdo.php');
 require_once(ABS_LIBRERIAS . 'pagination.php');
 require_once(ABS_LIBRERIAS . "tablefy.php");
 
-Doris::registerDSN('financiero', 'mysql://desarrollo@localhost:3306/financiero');
+Doris::registerDSN('financiero', 'pgsql://postgres:123456@localhost:4040/postgres');
+Doris::registerDSN('osce', 'pgsql://postgres:123456@localhost:4040/postgres');
+Doris::registerDSN('alquileres', 'pgsql://postgres:123456@localhost:4040/postgres');
+
 
 $DIAS  = array('domingo','lunes','martes','miercoles','jueves','viernes','sabado','domingo');
 $MESES = array('enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre');

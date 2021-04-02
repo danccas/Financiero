@@ -143,7 +143,7 @@ final class Doris {
     $this->parseDsn($dsn);
     $this->connect();
     if(!is_null($this->connection) && $this->type == 'pdo') {
-//      $this->exec("SET CHARACTER SET utf8");
+      $this->exec("SET CHARACTER SET utf8");
     }
   }
   function debug($x = true) { 
@@ -151,7 +151,6 @@ final class Doris {
     return $this;
   }
   function connect() {
-    $ce = $this;
     if ($this->protocol == 'mongodb') {
       $this->type = 'mongodb';
       $db = new MongoDB\Driver\Manager($this->protocol . '://' . $this->hosts['host'] . ':' . $this->hosts['port']);
@@ -161,11 +160,7 @@ final class Doris {
     } else {
       $this->type = 'pdo';
       try {
-        if (!empty($ce->hosts['port'])) {
-              $dsn = $ce->protocol . ':host=' . $ce->hosts['host'] . ';port=' . $ce->hosts['port'] . ';dbname=' . $ce->database;
-            } else {
-              $dsn = $ce->protocol . ':host=' . $ce->hosts['host'] . ';dbname=' . $ce->database;
-            }
+        $dsn = $this->protocol . ':host=' . $this->hosts['host'] . ';dbname=' . $this->database;
         $db = new PDO($dsn, $this->authentication['username'], $this->authentication['password']);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       } catch (PDOException $e) {
@@ -234,7 +229,7 @@ final class Doris {
     $this->exec($sql, array_values($fields));
     return $this->last_insert_id();
   }
-  function insert_update($table, $fields, $conflict = 'id') {
+  function insert_update($table, $fields) {
     if(empty($fields)) {
       return false;
     }
@@ -255,9 +250,7 @@ final class Doris {
       }
       $nfields[$fieldl] = $value;
     }
-
-    //    $sql = "INSERT INTO " . $table . " (" . $fieldlist . ") VALUES (" . $valuelist .") ON DUPLICATE KEY UPDATE " . $updatelist . ";";
-    $sql = "INSERT INTO " . $table . " (" . $fieldlist . ") VALUES (" . $valuelist .") ON CONFLICT (" . $conflict . ") DO UPDATE SET " . $updatelist . ";";
+    $sql = "INSERT INTO " . $table . " (" . $fieldlist . ") VALUES (" . $valuelist .") ON DUPLICATE KEY UPDATE " . $updatelist . ";";
     $this->exec($sql, $nfields);
     return $this->last_insert_id();
   }
@@ -432,11 +425,7 @@ final class Doris {
   }
   function last_insert_id() {
     if ($this->type == 'pdo') {
-      try {
-        return $this->connection->lastInsertId();
-      } catch(Exception $ee) {
-        return null;
-      }
+      return $this->connection->lastInsertId();
 
     } else {
       $this->except('<b>Doris:</b> I don\'t know how to return the last insert ID with this DB type!');
@@ -447,16 +436,13 @@ final class Doris {
     echo "<h1>Doris Error:</h1>\n<br><h3>Trace:</h3><br><pre>" . var_export(debug_backtrace(), true) . "</pre>";
     exit;
   }
-  function time($t = -1, $m = null) {
-    if(empty($t)) {
-		  return null;
-	  }
+  function time($t = null, $m = null) {
     if(!is_null($m))  {
       return date("Y-m-d H:i:s", strtotime($t . ' ' . $m . ':00'));
     }
-    if(is_numeric($t) && $t !== -1){
+    if(is_numeric($t)){
       return date("Y-m-d H:i:s", $t);
-    } elseif($t == -1) {
+    } elseif(is_null($t)) {
       return date("Y-m-d H:i:s");
     } else {
       return date("Y-m-d H:i:s", strtotime($t));
